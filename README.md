@@ -40,27 +40,26 @@ This pattern mirrors how mature platform teams reduce risk during releases while
 
 ## Architecture Overview
 
-### Active Components
+### Core Components
 
-1. **Target Application**  
-   The service being validated.
+1. **Target Application (Azure App Service – Linux)**  
+   Internal API under validation, exposing health, readiness, and data endpoints required for release verification.
 
-2. **Verifier Service**  
-   A control-plane service that performs validation logic and writes evidence.
+2. **Verifier Service (Azure App Service – Linux, Containerized)**  
+   Control-plane service responsible for executing validation logic, measuring performance, and writing immutable verification evidence.
 
-3. **Execution Layer (VM Scale Set)**  
-   Scalable workers that trigger verification.
+3. **Execution Layer (Azure Virtual Machine Scale Set)**  
+   Horizontally scalable worker pool that triggers verification requests during release activity.
 
-### Supporting Components
+4. **Evidence Storage (Azure Blob Storage)**  
+   Immutable system of record for verification results, accessed exclusively via Private Endpoint and RBAC.
 
-4. **Azure Storage (Blob)**  
-   Immutable evidence store.
+5. **Networking (Azure Virtual Network)**  
+   Private subnets, Private Endpoints, DNS integration, and access restrictions enforcing internal-only communication.
 
-5. **Azure Networking**  
-   Private endpoints, subnets, DNS, and access restrictions.
+6. **Identity & Access Control (Microsoft Entra ID)**  
+   Managed identities and role-based access control enforcing least privilege and separation of duties.
 
-6. **Microsoft Entra ID (Azure AD)**  
-   Identity, RBAC, and separation of duties.
 
 ## Target Application
 
