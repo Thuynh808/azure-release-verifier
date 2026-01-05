@@ -6,7 +6,7 @@ This project implements a **realistic, enterprise-grade release verification pla
 
 The solution is **infrastructure-first and operations-focused**, intentionally avoiding unnecessary application complexity. It mirrors how platform, cloud, and reliability teams validate internal services in production environments.
 
-The system continuously verifies a deployed API, scales verification workloads during release bursts, securely stores immutable verification evidence, and enforces identity- and network-based access controls.
+The system continuously verifies a deployed API, scales verification workloads during release bursts, securely stores immutable verification evidence, and enforces identity and access controls.
 
 >This project intentionally focuses on verification correctness, scalability, and security. Alerting, dashboards, and CI/CD integration are considered follow-on enhancements and are out of scope for the initial platform.
 
@@ -25,6 +25,18 @@ The platform enables infrastructure and platform teams to:
 ## Core Concept (Mental Model)
 
 > We operate a security intelligence service. We run an internal verification platform that continuously checks it, scales under load, and stores evidence for release validation and audit.
+
+## Why This Pattern Matters
+
+This platform demonstrates how verification, not deployment, is the final gate for production readiness.
+
+Rather than assuming a release is healthy based on deployment success, this design validates:
+- Runtime behavior
+- Performance thresholds
+- Horizontal scalability
+- Secure evidence retention
+
+This pattern mirrors how mature platform teams reduce risk during releases while maintaining auditability and operational clarity.
 
 ## Architecture Overview
 
@@ -79,7 +91,6 @@ The target application represents an **internal Security Intelligence API** that
 ### Enterprise Realism
 - Mirrors internal wrapper APIs used by security teams
 - Exposes operational endpoints required for verification
-- Designed to be validated externally, not trusted blindly
 
 ## Verifier Service
 
@@ -101,6 +112,14 @@ The Verifier is a **dedicated control-plane service** responsible for validating
 - Write evidence to Azure Blob Storage
 - Return pass/fail status to the caller
 
+  ![verifier execution validation results](media/verifier_execution.png)
+
+  <div align=center>
+     <em>
+        The verifier validates the target endpoint, measures latency, generates a unique check ID, and returns structured pass/fail results while writing immutable evidence to Blob Storage.
+     </em>
+  </div>
+  
 ### Key Design Decisions
 - Verifier is **stateless**
 - Workers do not write to storage directly
@@ -161,6 +180,24 @@ Blob Storage acts as the **system of record** for release verification and audit
 - CPU-based scaling rules
 - Scale-out and scale-in verified using **evidence volume**, not assumptions
 
+  ![vm scaling based on cpu load](media/scale_instances.png)
+
+  <div align=center>
+     <em>
+        VM Scale Set scaling verified via Azure CLI. CPU stress triggered scale-out from 1 to 3 instances, confirming autoscale rules function as designed.
+     </em>
+  </div>
+  
+  <br><br>
+
+  ![Verification evidence written to Blob Storage](media/results_blob.png)
+
+  <div align=center>
+     <em>
+        Increased volume of verification evidence written to Blob Storage during VM Scale Set scale-out. Each blob corresponds to an independent worker execution, confirming parallel verification under load.
+     </em>
+  </div>
+
 ### Enterprise Pattern
 - Centralized validation logic
 - Horizontally scalable execution
@@ -179,6 +216,24 @@ Blob Storage acts as the **system of record** for release verification and audit
 - Verifier inbound restricted to VMSS subnet
 - External calls receive `403 Forbidden`
 
+  ![Public network access disabled](media/public_disabled.png)
+
+  <div align=center>
+     <em>
+       Public network access disabled on the Storage Account, enforcing private-only data-plane access.
+     </em>
+  </div>
+  
+  <br><br>
+  
+  ![Private endpoint enforcement](media/private_endpoint.png)
+
+  <div align=center>
+     <em>
+        Azure CLI confirmation showing the Storage Account bound to a Private Endpoint, ensuring all storage access occurs within the virtual network.
+     </em>
+  </div>
+
 ### Validation
 - Evidence writes succeed only via private path
 - Jumpbox/laptop access blocked
@@ -186,47 +241,52 @@ Blob Storage acts as the **system of record** for release verification and audit
 
 ## Identity & Access Control
 
-### Managed Identity
-- Verifier uses system-assigned Managed Identity
-- No secrets anywhere in the platform
+### System Identity
+
+The verifier service uses a **system-assigned Managed Identity** to authenticate to Azure services.
+
+- No secrets, keys, or connection strings are used anywhere in the platform
+- Identity-based access is enforced at the data plane
+- The verifier identity has write access **only** to the verification evidence container
 
 ### Human Access
 
-#### Entra ID Group
-- **Name:** `Platform-Engineers-Verification-Readers`
+Human access is restricted to **read-only review** via Microsoft Entra ID group membership.
 
-#### Sample User
-- **User:** `platform.engineer@example.com`
-- Member of the above group
+- **Group:** `Platform-Engineers-Verification-Readers`
+- Access is scoped to verification evidence only
+- No human principals have write or delete permissions
 
-#### RBAC Assignments
+### RBAC Enforcement
 
 | Scope | Role |
 |-----|------|
 | Resource Group | Reader |
 | Storage Container (`results-raw`) | Storage Blob Data Reader |
 
-### Result
+### Access Outcomes
+
 Platform Engineers can:
-- View resources (read-only)
+- View platform resources (read-only)
 - List and download verification evidence
-- Validate releases using evidence
+- Validate release health using stored evidence
 
 They **cannot**:
 - Modify infrastructure
 - Change verification logic
-- Write or delete evidence
+- Write, overwrite, or delete evidence
 
-### Change Ownership & Responsibility
+### Ownership & Change Control
 
-Changes to infrastructure, verification logic, and security controls are owned by **Cloud / Infrastructure Engineering**.
+All changes to infrastructure, verification logic, and security controls are owned by **Cloud / Infrastructure Engineering**.
 
 This includes:
-- Modifying App Service configurations
-- Updating verifier validation logic or thresholds
-- Changing VM Scale Set behavior or autoscaling rules
-- Managing networking, Private Endpoints, and DNS
-- Adjusting RBAC assignments and identity policies
+- Application and verifier configuration
+- Verification logic and thresholds
+- VM Scale Set behavior and autoscaling rules
+- Networking, Private Endpoints, and DNS
+- RBAC assignments and identity policies
+
 
 ## Operational Workflow
 
