@@ -1,4 +1,4 @@
-# Azure Release Verification & Synthetic Monitoring Platform  
+# Azure Release Verification Platform  
 
 ## 1. Overview
 
@@ -219,25 +219,7 @@ They **cannot**:
 - Change verification logic
 - Write or delete evidence
 
-## 11. Roles & Responsibilities
-
-### Cloud / Infrastructure Engineering
-- Designs and maintains the platform
-- Owns networking, identity, scaling, and storage
-- Ensures verification system reliability
-
-### Platform Engineering / SRE
-- Consumes verification evidence
-- Reviews post-deployment results
-- Makes release go/no-go decisions
-- Operates with read-only access
-
-### Security / Audit (Oversight)
-- Reviews access controls and evidence
-- Validates network isolation and RBAC
-- Uses storage as audit source of truth
-
-## 12. Operational Workflow
+## 11. Operational Workflow
 
 1. Application is deployed
 2. VMSS workers trigger verification
@@ -246,7 +228,7 @@ They **cannot**:
 5. Platform Engineers review results
 6. Release health is confirmed or escalated
 
-## 13. Design Principles
+## 12. Design Principles
 
 - Infrastructure-first
 - Evidence over assumptions
@@ -254,7 +236,7 @@ They **cannot**:
 - Stateless and scalable components
 - No unnecessary services
 
-## 14. Project Status
+## 13. Project Status
 
 **Status:** Complete and production-aligned
 
