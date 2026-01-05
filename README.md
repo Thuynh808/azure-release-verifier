@@ -4,10 +4,6 @@
 
 This project implements a **realistic, enterprise-grade release verification platform** on Microsoft Azure. The platform is designed to validate the health, correctness, and performance of an internal application after deployment using automated verification, scalable execution, and audit-ready evidence.
 
-The solution is **infrastructure-first and operations-focused**, intentionally avoiding unnecessary application complexity. It mirrors how platform, cloud, and reliability teams validate internal services in production environments.
-
-The system continuously verifies a deployed API, scales verification workloads during release bursts, securely stores immutable verification evidence, and enforces identity and access controls.
-
 >This project intentionally focuses on verification correctness, scalability, and security. Alerting, dashboards, and CI/CD integration are considered follow-on enhancements and are out of scope for the initial platform.
 
 ## High-Level Purpose
@@ -21,10 +17,6 @@ The platform enables infrastructure and platform teams to:
 - Securely store verification evidence
 - Enforce least-privilege access and network isolation
 - Provide audit-ready proof of operational correctness
-
-## Core Concept (Mental Model)
-
-> We operate a security intelligence service. We run an internal verification platform that continuously checks it, scales under load, and stores evidence for release validation and audit.
 
 ## Why This Pattern Matters
 
