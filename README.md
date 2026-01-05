@@ -1,7 +1,5 @@
 # Azure Release Verification & Synthetic Monitoring Platform  
 
----
-
 ## 1. Overview
 
 This project implements a **realistic, enterprise-grade release verification platform** on Microsoft Azure. The platform is designed to validate the health, correctness, and performance of an internal application after deployment using automated verification, scalable execution, and audit-ready evidence.
@@ -9,8 +7,6 @@ This project implements a **realistic, enterprise-grade release verification pla
 The solution is **infrastructure-first and operations-focused**, intentionally avoiding unnecessary application complexity. It mirrors how platform, cloud, and reliability teams validate internal services in production environments.
 
 The system continuously verifies a deployed API, scales verification workloads during release bursts, securely stores immutable verification evidence, and enforces identity- and network-based access controls.
-
----
 
 ## 2. High-Level Purpose
 
@@ -24,18 +20,10 @@ The platform enables infrastructure and platform teams to:
 - Enforce least-privilege access and network isolation
 - Provide audit-ready proof of operational correctness
 
-This aligns naturally with **AZ-104 (Azure Administrator)** responsibilities and reflects real enterprise operational patterns.
-
----
-
 ## 3. Core Concept (Mental Model)
 
-> “We operate a security intelligence service.  
-> We run an internal verification platform that continuously checks it, scales under load, and stores evidence for release validation and audit.”
-
-The system is divided into **three active components** and **three supporting components**.
-
----
+> We operate a security intelligence service.  
+> We run an internal verification platform that continuously checks it, scales under load, and stores evidence for release validation and audit.
 
 ## 4. Architecture Overview
 
@@ -61,9 +49,7 @@ The system is divided into **three active components** and **three supporting co
 6. **Microsoft Entra ID (Azure AD)**  
    Identity, RBAC, and separation of duties.
 
----
-
-## 5. Target Application (Phase 1)
+## 5. Target Application
 
 ### Purpose
 The target application represents an **internal Security Intelligence API** that aggregates breach data from Have I Been Pwned (HIBP).
@@ -94,9 +80,7 @@ The target application represents an **internal Security Intelligence API** that
 - Exposes operational endpoints required for verification
 - Designed to be validated externally, not trusted blindly
 
----
-
-## 6. Verifier Service (Phase 2)
+## 6. Verifier Service
 
 ### Purpose
 The Verifier is a **dedicated control-plane service** responsible for validating the target application and producing structured verification evidence.
@@ -123,11 +107,8 @@ The Verifier is a **dedicated control-plane service** responsible for validating
 - No secrets, keys, or connection strings used
 
 ### Storage Access
-- Uses `DefaultAzureCredential`
 - RBAC-based data-plane permissions
 - Writes only to `results-raw/`
-
----
 
 ## 7. Evidence Storage (Azure Blob Storage)
 
@@ -149,15 +130,13 @@ results-summary/
 
 ### Role Separation
 - **Writer:** Verifier Managed Identity
-- **Readers:** Human roles (Platform Engineers)
+- **Readers:** Platform Engineers
 - **No deletes or overwrites**
 
 ### Purpose
 Blob Storage acts as the **system of record** for release verification and audit review.
 
----
-
-## 8. Execution Layer (Phase 3)
+## 8. Execution Layer
 
 ### Platform
 - Azure Virtual Machine Scale Set (Uniform)
@@ -189,9 +168,7 @@ Blob Storage acts as the **system of record** for release verification and audit
 - Horizontally scalable execution
 - Workers treated as disposable
 
----
-
-## 9. Network Security & Isolation (Phase 4)
+## 9. Network Security & Isolation
 
 ### VNet Design
 - Private subnets
@@ -209,15 +186,13 @@ Blob Storage acts as the **system of record** for release verification and audit
 - Jumpbox/laptop access blocked
 - VMSS workers continue to operate normally
 
----
-
 ## 10. Identity & Access Control
 
 ### Managed Identity
 - Verifier uses system-assigned Managed Identity
 - No secrets anywhere in the platform
 
-### Human Access (Final Phase)
+### Human Access
 
 #### Entra ID Group
 - **Name:** `Platform-Engineers-Verification-Readers`
@@ -244,8 +219,6 @@ They **cannot**:
 - Change verification logic
 - Write or delete evidence
 
----
-
 ## 11. Roles & Responsibilities
 
 ### Cloud / Infrastructure Engineering
@@ -264,8 +237,6 @@ They **cannot**:
 - Validates network isolation and RBAC
 - Uses storage as audit source of truth
 
----
-
 ## 12. Operational Workflow
 
 1. Application is deployed
@@ -275,34 +246,15 @@ They **cannot**:
 5. Platform Engineers review results
 6. Release health is confirmed or escalated
 
----
-
-## 13. AZ-104 Skills Demonstrated
-
-- Azure App Service (code + containers)
-- Azure Container Registry
-- Managed Identity
-- RBAC (control plane vs data plane)
-- Virtual Networks and subnets
-- VM Scale Sets and autoscaling
-- Private Endpoints and Private DNS
-- Secure PaaS-to-PaaS communication
-- CLI-first provisioning and validation
-
----
-
-## 14. Design Principles
+## 13. Design Principles
 
 - Infrastructure-first
 - Evidence over assumptions
 - Least privilege everywhere
 - Stateless and scalable components
 - No unnecessary services
-- Enterprise realism over exam checklists
 
----
-
-## 15. Project Status
+## 14. Project Status
 
 **Status:** Complete and production-aligned
 
