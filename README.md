@@ -1,6 +1,6 @@
 # Azure Release Verification Platform  
 
-## 1. Overview
+## Overview
 
 This project implements a **realistic, enterprise-grade release verification platform** on Microsoft Azure. The platform is designed to validate the health, correctness, and performance of an internal application after deployment using automated verification, scalable execution, and audit-ready evidence.
 
@@ -8,7 +8,9 @@ The solution is **infrastructure-first and operations-focused**, intentionally a
 
 The system continuously verifies a deployed API, scales verification workloads during release bursts, securely stores immutable verification evidence, and enforces identity- and network-based access controls.
 
-## 2. High-Level Purpose
+>This project intentionally focuses on verification correctness, scalability, and security. Alerting, dashboards, and CI/CD integration are considered follow-on enhancements and are out of scope for the initial platform.
+
+## High-Level Purpose
 
 The platform enables infrastructure and platform teams to:
 
@@ -20,12 +22,11 @@ The platform enables infrastructure and platform teams to:
 - Enforce least-privilege access and network isolation
 - Provide audit-ready proof of operational correctness
 
-## 3. Core Concept (Mental Model)
+## Core Concept (Mental Model)
 
-> We operate a security intelligence service.  
-> We run an internal verification platform that continuously checks it, scales under load, and stores evidence for release validation and audit.
+> We operate a security intelligence service. We run an internal verification platform that continuously checks it, scales under load, and stores evidence for release validation and audit.
 
-## 4. Architecture Overview
+## Architecture Overview
 
 ### Active Components
 
@@ -49,7 +50,7 @@ The platform enables infrastructure and platform teams to:
 6. **Microsoft Entra ID (Azure AD)**  
    Identity, RBAC, and separation of duties.
 
-## 5. Target Application
+## Target Application
 
 ### Purpose
 The target application represents an **internal Security Intelligence API** that aggregates breach data from Have I Been Pwned (HIBP).
@@ -80,7 +81,7 @@ The target application represents an **internal Security Intelligence API** that
 - Exposes operational endpoints required for verification
 - Designed to be validated externally, not trusted blindly
 
-## 6. Verifier Service
+## Verifier Service
 
 ### Purpose
 The Verifier is a **dedicated control-plane service** responsible for validating the target application and producing structured verification evidence.
@@ -110,7 +111,7 @@ The Verifier is a **dedicated control-plane service** responsible for validating
 - RBAC-based data-plane permissions
 - Writes only to `results-raw/`
 
-## 7. Evidence Storage (Azure Blob Storage)
+## Evidence Storage (Azure Blob Storage)
 
 ### Structure
 
@@ -136,7 +137,7 @@ results-summary/
 ### Purpose
 Blob Storage acts as the **system of record** for release verification and audit review.
 
-## 8. Execution Layer
+## Execution Layer
 
 ### Platform
 - Azure Virtual Machine Scale Set (Uniform)
@@ -145,10 +146,7 @@ Blob Storage acts as the **system of record** for release verification and audit
 
 ### Worker Behavior
 - Each VM is an independent worker
-- Periodically triggers: 
-  ```bash
-  POST /verify/breaches
-  ```
+- Periodically triggers an HTTP POST to `/verify/breaches`
 - No local state
 - No direct storage access
 
@@ -168,7 +166,7 @@ Blob Storage acts as the **system of record** for release verification and audit
 - Horizontally scalable execution
 - Workers treated as disposable
 
-## 9. Network Security & Isolation
+## Network Security & Isolation
 
 ### VNet Design
 - Private subnets
@@ -186,7 +184,7 @@ Blob Storage acts as the **system of record** for release verification and audit
 - Jumpbox/laptop access blocked
 - VMSS workers continue to operate normally
 
-## 10. Identity & Access Control
+## Identity & Access Control
 
 ### Managed Identity
 - Verifier uses system-assigned Managed Identity
@@ -219,7 +217,18 @@ They **cannot**:
 - Change verification logic
 - Write or delete evidence
 
-## 11. Operational Workflow
+### Change Ownership & Responsibility
+
+Changes to infrastructure, verification logic, and security controls are owned by **Cloud / Infrastructure Engineering**.
+
+This includes:
+- Modifying App Service configurations
+- Updating verifier validation logic or thresholds
+- Changing VM Scale Set behavior or autoscaling rules
+- Managing networking, Private Endpoints, and DNS
+- Adjusting RBAC assignments and identity policies
+
+## Operational Workflow
 
 1. Application is deployed
 2. VMSS workers trigger verification
@@ -228,7 +237,7 @@ They **cannot**:
 5. Platform Engineers review results
 6. Release health is confirmed or escalated
 
-## 12. Design Principles
+## Design Principles
 
 - Infrastructure-first
 - Evidence over assumptions
@@ -236,7 +245,7 @@ They **cannot**:
 - Stateless and scalable components
 - No unnecessary services
 
-## 13. Project Status
+## Project Status
 
 **Status:** Complete and production-aligned
 
