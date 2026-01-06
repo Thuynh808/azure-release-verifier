@@ -1,5 +1,7 @@
 # Azure Release Verification Platform  
 
+![Project workflow diagram](media/workflow-diagram.gif)
+
 ## Overview
 
 This project implements a **realistic, enterprise-grade release verification platform** on Microsoft Azure. The platform is designed to validate the health, correctness, and performance of an internal application after deployment using automated verification, scalable execution, and audit-ready evidence.
